@@ -22,13 +22,13 @@
  * Requires boost library for circular buffer.
  */
 
-#include <STA.h>
+#include "spike-triggered-average.h"
 #include <math.h>
 #include <algorithm>
 #include <numeric>
 #include <time.h>
 
-#include <qdatetime.h>
+/*#include <qdatetime.h>
 #include <qfile.h>
 #include <qgridview.h>
 #include <qhbox.h>
@@ -46,21 +46,22 @@
 #include <qvalidator.h>
 #include <qvbox.h>
 #include <qwhatsthis.h>
-#include <qtextstream.h>
+#include <qtextstream.h>*/
+#include <QtGui>
 #include <sys/stat.h>
-#include <qwt-qt3/qwt_plot.h>
-#include <qwt-qt3/qwt_plot_curve.h>
-#if QT_VERSION >= 0x040300
-#ifdef QT_SVG_LIB
-#include <qsvggenerator.h>
-#endif
-#endif
-#if QT_VERSION >= 0x040000
-#include <qprintdialog.h>
-#include <qfileinfo.h>
-#else
-#include <qwt-qt3/qwt_painter.h>
-#endif
+#include <qwt_plot.h>
+#include <qwt_plot_curve.h>
+//#if QT_VERSION >= 0x040300
+//#ifdef QT_SVG_LIB
+//#include <qsvggenerator.h>
+//#endif
+//#endif
+//#if QT_VERSION >= 0x040000
+//#include <qprintdialog.h>
+//#include <qfileinfo.h>
+//#else
+#include <qwt_painter.h>
+//#endif
 
 extern "C" Plugin::Object *
 createRTXIPlugin(void)
@@ -88,11 +89,10 @@ STA::STA(void) :
   DefaultGUIModel("STA", ::vars, ::num_vars)
 {
 
-  QWhatsThis::add(
-      this,
+  setWhatsThis(
       "<p><b>STA:</b></p><p> This plug-in computes an event-triggered average of the input signal. The event trigger should provide a value of 1. The averaged signal will update periodically. Click and drag on the plot to resize the axes.</p>");
   initParameters();
-  createGUI(vars, num_vars); // this is required to create the GUI
+  DefaultGUIModel::createGUI(vars, num_vars); // this is required to create the GUI
   update( INIT);
   refresh(); // this is required to update the GUI with parameter and state values
   //emit setPlotRange(-leftwintime, rightwintime, plotymin, plotymax);
@@ -101,156 +101,40 @@ STA::STA(void) :
 
 }
 
-void
-STA::createGUI(DefaultGUIModel::variable_t *var, int size)
-{
-  setMinimumSize(200, 300); // Qt API for setting window size
+void STA::customizeGUI(void) {
+	QGridLayout *customLayout = DefaultGUIModel::getLayout();
 
-  QBoxLayout *layout = new QHBoxLayout(this); // overall GUI layout
+//	QVBoxLayout *leftLayout = new QVBoxLayout;
 
-  // Left side GUI
-  QBoxLayout *leftlayout = new QVBoxLayout();
+	rplot = new BasicPlot(this);
+	rCurve = new QwtPlotCurve("Curve 1");
+	rCurve->attach(rplot);
+	rCurve->setPen(QColor(Qt::white));
 
-  // create custom GUI components
-  rplot = new BasicPlot(this);
-  rCurve = new QwtPlotCurve("Curve 1");
-  rCurve->attach(rplot);
-  rCurve->setPen(QColor(Qt::white));
+	QVBoxLayout *rightLayout = new QVBoxLayout;
+	QGroupBox *plotBox = new QGroupBox("Event-triggered Average Plot");
+	QPushButton *clearButton = new QPushButton("&Clear", plotBox);
+	QPushButton *savePlotButton = new QPushButton("Save Screenshot", plotBox);
+	QPushButton *printButton = new QPushButton("Print", plotBox);
+	QPushButton *saveDataButton = new QPushButton("Save Data", plotBox);
 
-  QBoxLayout *rightlayout = new QVBoxLayout();
-  QHButtonGroup *plotBox = new QHButtonGroup("Event-triggered Average Plot:",
-      this);
-  QPushButton *clearButton = new QPushButton("&Clear", plotBox);
-  QPushButton *savePlotButton = new QPushButton("Save Screenshot", plotBox);
-  QPushButton *printButton = new QPushButton("Print", plotBox);
-  QPushButton *saveDataButton = new QPushButton("Save Data", plotBox);
+	QObject::connect(clearButton, SIGNAL(clicked()), this, SLOT(clearData()));
+	QObject::connect(savePlotButton, SIGNAL(clicked()), this, SLOT(exportSVG()));
+	QObject::connect(printButton, SIGNAL(clicked()), this, SLOT(print()));
+	QObject::connect(saveDataButton, SIGNAL(clicked()), this, SLOT(saveData()));
 
-  QObject::connect(clearButton, SIGNAL(clicked()), this, SLOT(clearData()));
-  QObject::connect(savePlotButton, SIGNAL(clicked()), this, SLOT(exportSVG()));
-  QObject::connect(printButton, SIGNAL(clicked()), this, SLOT(print()));
-  QObject::connect(saveDataButton, SIGNAL(clicked()), this, SLOT(saveData()));
+	rightLayout->addWidget(plotBox);
+	rightLayout->addWidget(rplot);
 
-  rightlayout->addWidget(plotBox);
-  rightlayout->addWidget(rplot);
-  QObject::connect(this, SIGNAL(setPlotRange(double, double, double, double)), rplot,
-      SLOT(setAxes(double, double, double, double)));
+	QObject::connect(this, SIGNAL(setPlotRange(double, double, double, double)), rplot, SLOT(setAxes(double, double, double, double)));
 
-  // Add custom left side GUI components to layout above default_gui_model components
-
-  // Create default_gui_model GUI DO NOT EDIT
-  QScrollView *sv = new QScrollView(this);
-  sv->setResizePolicy(QScrollView::AutoOneFit);
-  leftlayout->addWidget(sv);
-
-  QWidget *viewport = new QWidget(sv->viewport());
-  sv->addChild(viewport);
-  QGridLayout *scrollLayout = new QGridLayout(viewport, 1, 2);
-
-  size_t nstate = 0, nparam = 0, nevent = 0, ncomment = 0;
-  for (size_t i = 0; i < num_vars; i++)
-    {
-      if (vars[i].flags & (PARAMETER | STATE | EVENT | COMMENT))
-        {
-          param_t param;
-
-          param.label = new QLabel(vars[i].name, viewport);
-          scrollLayout->addWidget(param.label, parameter.size(), 0);
-          param.edit = new DefaultGUILineEdit(viewport);
-          scrollLayout->addWidget(param.edit, parameter.size(), 1);
-
-          QToolTip::add(param.label, vars[i].description);
-          QToolTip::add(param.edit, vars[i].description);
-
-          if (vars[i].flags & PARAMETER)
-            {
-              if (vars[i].flags & DOUBLE)
-                {
-                  param.edit->setValidator(new QDoubleValidator(param.edit));
-                  param.type = PARAMETER | DOUBLE;
-                }
-              else if (vars[i].flags & UINTEGER)
-                {
-                  QIntValidator *validator = new QIntValidator(param.edit);
-                  param.edit->setValidator(validator);
-                  validator->setBottom(0);
-                  param.type = PARAMETER | UINTEGER;
-                }
-              else if (vars[i].flags & INTEGER)
-                {
-                  param.edit->setValidator(new QIntValidator(param.edit));
-                  param.type = PARAMETER | INTEGER;
-                }
-              else
-                param.type = PARAMETER;
-              param.index = nparam++;
-              param.str_value = new QString;
-            }
-          else if (vars[i].flags & STATE)
-            {
-              param.edit->setReadOnly(true);
-              param.edit->setPaletteForegroundColor(Qt::darkGray);
-              param.type = STATE;
-              param.index = nstate++;
-            }
-          else if (vars[i].flags & EVENT)
-            {
-              param.edit->setReadOnly(true);
-              param.type = EVENT;
-              param.index = nevent++;
-            }
-          else if (vars[i].flags & COMMENT)
-            {
-              param.type = COMMENT;
-              param.index = ncomment++;
-            }
-
-          parameter[vars[i].name] = param;
-        }
-    }
-
-  QHBox *utilityBox = new QHBox(this);
-  pauseButton = new QPushButton("Pause", utilityBox);
-  pauseButton->setToggleButton(true);
-  QObject::connect(pauseButton,SIGNAL(toggled(bool)),this,SLOT(pause(bool)));
-  QObject::connect(pauseButton,SIGNAL(toggled(bool)),savePlotButton,SLOT(setEnabled(bool)));
-  QObject::connect(pauseButton,SIGNAL(toggled(bool)),printButton,SLOT(setEnabled(bool)));
-  QObject::connect(pauseButton,SIGNAL(toggled(bool)),saveDataButton,SLOT(setEnabled(bool)));
-  QPushButton *modifyButton = new QPushButton("Modify", utilityBox);
-  QObject::connect(modifyButton,SIGNAL(clicked(void)),this,SLOT(modify(void)));
-  QPushButton *unloadButton = new QPushButton("Unload", utilityBox);
-  QObject::connect(unloadButton,SIGNAL(clicked(void)),this,SLOT(exit(void)));
-  QObject::connect(pauseButton,SIGNAL(toggled(bool)),modifyButton,SLOT(setEnabled(bool)));
-  QToolTip::add(pauseButton, "Start/Stop current clamp protocol");
-  QToolTip::add(modifyButton, "Commit changes to parameter values");
-  QToolTip::add(unloadButton, "Close module");
-
-  // add custom components to layout below default_gui_model components
-  leftlayout->addWidget(utilityBox);
-  // Add left and right side layouts to the overall layout
-  layout->addLayout(leftlayout);
-  //	layout->setResizeMode(QLayout::Fixed);
-  layout->addLayout(rightlayout);
-  leftlayout->setResizeMode(QLayout::Fixed);
-  layout->setStretchFactor(rightlayout, 4);
-  layout->setResizeMode(QLayout::FreeResize);
-
-  // set GUI refresh rate
-  QTimer *timer2 = new QTimer(this);
-  timer2->start(2000);
-  // set STA plot refresh rate
-  QObject::connect(timer2, SIGNAL(timeout(void)), this, SLOT(refreshSTA(void)));
-
-  show();
-
+	customLayout->addLayout(rightLayout, 0, 1);
+	setLayout(customLayout);
 }
 
-STA::~STA(void)
-{
-}
+STA::~STA(void) {}
 
-void
-STA::execute(void)
-{
+void STA::execute(void) {
   systime = count * dt; // current time,
   signalin.push_back(input(0)); // always buffer, we don't know when the event occurs
 
@@ -281,11 +165,8 @@ STA::execute(void)
   return;
 }
 
-void
-STA::update(DefaultGUIModel::update_flags_t flag)
-{
-  switch (flag)
-    {
+void STA::update(DefaultGUIModel::update_flags_t flag) {
+  switch (flag) {
   case INIT:
     setParameter("Left Window (s)", QString::number(leftwintime));
     setParameter("Right Window (s)", QString::number(rightwintime));
@@ -319,9 +200,7 @@ STA::update(DefaultGUIModel::update_flags_t flag)
 
 // custom functions
 
-void
-STA::initParameters()
-{
+void STA::initParameters() {
   dt = RT::System::getInstance()->getPeriod() * 1e-9; // s
   signalin.clear();
   assert(signalin.size() == 0);
@@ -333,9 +212,7 @@ STA::initParameters()
 
 }
 
-void
-STA::bookkeep()
-{
+void STA::bookkeep() {
   triggered = 0;
   count = 0;
   eventcount = 0;
@@ -360,11 +237,9 @@ STA::bookkeep()
 
 }
 
-void
-STA::refreshSTA()
-{
+void STA::refreshSTA(){
 
-  rCurve->setData(time, staavg, n);
+  rCurve->setSamples(time, staavg);//, n);
   rplot->replot();
   emit setPlotRange(-leftwintime, rightwintime, plotymin, plotymax);
   /*
@@ -375,9 +250,7 @@ STA::refreshSTA()
    */
 }
 
-void
-STA::clearData()
-{
+void STA::clearData() {
   eventcount = 0;
   for (int i = 0; i < n; i++)
     {
@@ -391,20 +264,21 @@ STA::clearData()
       staavg[i] = 0;
     }
 
-  rCurve->setData(time, staavg, n);
+  rCurve->setSamples(time, staavg);//, n);
   rplot->replot();
 }
 
-void
-STA::saveData()
-{
-  QFileDialog* fd = new QFileDialog(this, "Save File As", TRUE);
-  fd->setMode(QFileDialog::AnyFile);
+void STA::saveData() {
+  QFileDialog* fd = new QFileDialog(this);//, "Save File As", TRUE);
+  fd->setFileMode(QFileDialog::AnyFile);
   fd->setViewMode(QFileDialog::Detail);
+  QStringList fileList;
   QString fileName;
   if (fd->exec() == QDialog::Accepted)
     {
-      fileName = fd->selectedFile();
+		fileList = fd->selectedFiles();
+		if (!fileList.isEmpty()) fileName = fileList[0];
+//      fileName = fd->selectedFile();
 
       if (OpenFile(fileName))
         {
@@ -425,10 +299,8 @@ STA::saveData()
     }
 }
 
-bool
-STA::OpenFile(QString FName)
-{
-  dataFile.setName(FName);
+bool STA::OpenFile(QString FName) {
+  dataFile.setFileName(FName);
   if (dataFile.exists())
     {
       switch (QMessageBox::warning(this, "Event-triggered Average", tr(
@@ -437,13 +309,15 @@ STA::OpenFile(QString FName)
         {
       case 0: // overwrite
         dataFile.remove();
-        if (!dataFile.open(IO_Raw | IO_WriteOnly))
+//        if (!dataFile.open(IO_Raw | IO_WriteOnly))
+        if (!dataFile.open(QIODevice::Unbuffered | QIODevice::WriteOnly ))
           {
             return false;
           }
         break;
       case 1: // append
-        if (!dataFile.open(IO_Raw | IO_WriteOnly | IO_Append))
+//        if (!dataFile.open(IO_Raw | IO_WriteOnly | IO_Append))
+		  if (!dataFile.open(QIODevice::Unbuffered | QIODevice::Append ))
           {
             return false;
           }
@@ -455,18 +329,18 @@ STA::OpenFile(QString FName)
     }
   else
     {
-      if (!dataFile.open(IO_Raw | IO_WriteOnly))
+//      if (!dataFile.open(IO_Raw | IO_WriteOnly))
+      if (!dataFile.open(QIODevice::Unbuffered | QIODevice::WriteOnly))
         return false;
     }
   stream.setDevice(&dataFile);
-  printf("File opened: %s\n", FName.latin1());
+//  printf("File opened: %s\n", FName.toLatin1());
+  printf("File opened: %s\n", FName.toUtf8().constData());
   return true;
 }
 
-void
-STA::print()
-{
-#if 1
+void STA::print() {
+/*#if 1
   QPrinter printer;
 #else
   QPrinter printer(QPrinter::HighResolution);
@@ -508,11 +382,10 @@ STA::print()
         }
       rplot->print(printer, filter);
     }
+	 */
 }
 
-void
-STA::exportSVG()
-{
+void STA::exportSVG() {
   QString fileName = "STA.svg";
 
 #if QT_VERSION < 0x040000

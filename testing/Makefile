@@ -1,20 +1,13 @@
-PLUGIN_NAME = STA
+PLUGIN_NAME = spike_triggered_average
 
-HEADERS = STA.h
+HEADERS = spike-triggered-average.h\
+          basicplot.h
 
 LIBS = -lqwt
 
-SOURCES = STA.cpp \
-    moc_STA.cpp\
-    ../include/basicplot.h\
-    ../include/basicplot.cpp\
-    ../include/scrollbar.h\
-    ../include/scrollbar.cpp\
-    ../include/scrollzoomer.h\
-    ../include/scrollzoomer.cpp\
-    ../include/moc_scrollbar.cpp\
-    ../include/moc_scrollzoomer.cpp\
-    ../include/moc_basicplot.cpp
+SOURCES = spike-triggered-average.cpp \
+          moc_spike-triggered-average.cpp\
+			 basicplot.cpp
     
 ### Do not edit below this line ###
 

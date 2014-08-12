@@ -24,15 +24,14 @@
 
 #include <default_gui_model.h>
 #include <boost/circular_buffer.hpp>
-#include "../include/basicplot.h"
-#include "../include/RTXIprintfilter.h"
-#include <qstring.h>
+#include <basicplot.h>
+//#include <RTXIprintfilter.h>
+#include <QtGui>
 #include <cstdlib>
-#include <qmessagebox.h>
-#include <qcombobox.h>
-#include <qwt-qt3/qwt_plot_curve.h>
-#include <qwt-qt3/qwt_array.h>
-#include <qfiledialog.h>
+#include <qwt_plot_curve.h>
+// #include <qwt_array.h> deprecated
+#include <qwt_compat.h>
+//#include <qfiledialog.h>
 
 class STA : public DefaultGUIModel
 {
@@ -42,12 +41,10 @@ Q_OBJECT
 public:
 
   STA(void);
-  virtual
-  ~STA(void);
-  void
-  execute(void);
-  void
-  createGUI(DefaultGUIModel::variable_t *, int);
+  virtual ~STA(void);
+  void execute(void);
+//  void createGUI(DefaultGUIModel::variable_t *, int);
+	void customizeGUI(void);
 
 public slots:
 
