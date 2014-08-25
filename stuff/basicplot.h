@@ -9,7 +9,6 @@
 #include <qwt_scale_widget.h>
 #include <qwt_scale_draw.h>
 #include <qwt_plot.h>
-#include <qwt_plot_canvas.h>
 #include <qwt_compat.h>
 
 class Zoomer : public ScrollZoomer
@@ -29,15 +28,16 @@ public:
   {
     QwtScaleWidget *scaleWidget = plot()->axisWidget(yAxis());
     QwtScaleDraw *sd = scaleWidget->scaleDraw();
-/*    int minExtent = 0;
+/*
+    int minExtent = 0;
     if (zoomRectIndex() > 0)
       {
         minExtent = sd->spacing() + sd->majTickLength() + 1;
         minExtent += sd->labelSize(scaleWidget->font(), 1000).width();
       }
 */
-    double minExtent = 0.0;
-	 minExtent = sd->extent(scaleWidget->font());
+    double minExtent = 0;
+    minExtent = sd->extent(scaleWidget->font());
     sd->setMinimumExtent(minExtent);
     ScrollZoomer::rescale();
   }
@@ -74,6 +74,7 @@ public:
   ;
   virtual QSize
   sizeHint() const;
+  Zoomer *zoomer;
 
 signals:
 
@@ -84,7 +85,6 @@ public slots:
 
   void
   setAxes(double xmin, double xmax, double ymin, double ymax);
-  Zoomer *zoomer;
 
 private:
 
