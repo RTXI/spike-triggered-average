@@ -5,8 +5,9 @@
 
 ![Spite-Triggered Average GUI](spike-triggered-average.png)
 
+<!--start-->
 This module computes an event or spike-triggered average of any input signal. You specify a time window of interest around the spike. This screenshot was made using a neuron model to generate spikes and the SpikeDetect module to detect spikes. The STA module then plots the average spike shape waveform is plotted.
-
+<!--end-->
 To install the Boost libraries in Ubuntu:
 ````
 $ sudo apt-get install libboost-dev
