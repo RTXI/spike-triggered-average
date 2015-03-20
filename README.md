@@ -3,11 +3,10 @@
 **Requirements:** Qwt, Spike Detector plugin, Plot helper classes (included), Boost libraries
 **Limitations:** None noted
 
-![Spite-Triggered Average GUI](spike-triggered-average.png)
+![EDIT THIS LINK](http://www.rtxi.org/wp-content/uploads/2010/04/STA0.png)
 
-<!--start-->
 This module computes an event or spike-triggered average of any input signal. You specify a time window of interest around the spike. This screenshot was made using a neuron model to generate spikes and the SpikeDetect module to detect spikes. The STA module then plots the average spike shape waveform is plotted.
-<!--end-->
+
 To install the Boost libraries in Ubuntu:
 ````
 $ sudo apt-get install libboost-dev

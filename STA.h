@@ -24,8 +24,8 @@
 
 #include <default_gui_model.h>
 #include <boost/circular_buffer.hpp>
-#include "../include/basicplot.h"
-#include "../include/RTXIprintfilter.h"
+#include "include/basicplot.h"
+#include "include/RTXIprintfilter.h"
 #include <qstring.h>
 #include <cstdlib>
 #include <qmessagebox.h>
