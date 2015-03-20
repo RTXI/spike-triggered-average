@@ -77,6 +77,7 @@ STA::STA(void) : DefaultGUIModel("STA", ::vars, ::num_vars) {
 	//emit setPlotRange(-leftwintime, rightwintime, plotymin, plotymax);
 	//refreshSTA();
 	printf("\nStarting Event-Triggered Average:\n"); // prints to terminal
+	QTimer::singleShot(0, this, SLOT(resizeMe()));
 }
 
 void STA::customizeGUI(void) {

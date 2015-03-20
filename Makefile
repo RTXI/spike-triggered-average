@@ -1,18 +1,20 @@
 PLUGIN_NAME = spike_triggered_average
 
+RTXI_INCLUDES = /usr/local/lib/rtxi_includes
+
 HEADERS = spike-triggered-average.h\
-          /usr/local/lib/rtxi_includes/scrollbar.h\
-          /usr/local/lib/rtxi_includes/scrollzoomer.h\
-          /usr/local/lib/rtxi_includes/basicplot.h\
+          $(RTXI_INCLUDES)/scrollbar.h\
+          $(RTXI_INCLUDES)/scrollzoomer.h\
+          $(RTXI_INCLUDES)/basicplot.h\
 
 SOURCES = spike-triggered-average.cpp \
           moc_spike-triggered-average.cpp\
-			 /usr/local/lib/rtxi_includes/basicplot.cpp\
-          /usr/local/lib/rtxi_includes/scrollbar.cpp\
-          /usr/local/lib/rtxi_includes/scrollzoomer.cpp\
-          /usr/local/lib/rtxi_includes/moc_scrollbar.cpp\
-          /usr/local/lib/rtxi_includes/moc_scrollzoomer.cpp\
-			 /usr/local/lib/rtxi_includes/moc_basicplot.cpp\
+			 $(RTXI_INCLUDES)/basicplot.cpp\
+          $(RTXI_INCLUDES)/scrollbar.cpp\
+          $(RTXI_INCLUDES)/scrollzoomer.cpp\
+          $(RTXI_INCLUDES)/moc_scrollbar.cpp\
+          $(RTXI_INCLUDES)/moc_scrollzoomer.cpp\
+			 $(RTXI_INCLUDES)/moc_basicplot.cpp\
 
 LIBS = -lqwt
 
