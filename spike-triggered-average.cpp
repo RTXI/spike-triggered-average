@@ -35,13 +35,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #if QT_VERSION >= 0x040300
 #ifdef QT_SVG_LIB
-#include <qsvggenerator.h>
+#include <QSvgGenerator>
 #endif
 #endif
 
 #if QT_VERSION >= 0x040000
-#include <qprintdialog.h>
-#include <qfileinfo.h>
+#include <QPrintDialog>
+#include <QFileInfo>
 #else
 #include <qwt_painter.h>
 #endif
@@ -72,10 +72,11 @@ STA::STA(void) : DefaultGUIModel("STA", ::vars, ::num_vars) {
 	initParameters();
 	DefaultGUIModel::createGUI(vars, num_vars); // this is required to create the GUI
 	customizeGUI();
-	update( INIT);
+	update( INIT );
 	refresh(); // this is required to update the GUI with parameter and state values
-	//emit setPlotRange(-leftwintime, rightwintime, plotymin, plotymax);
-	//refreshSTA();
+	
+	emit setPlotRange(-leftwintime, rightwintime, plotymin, plotymax);
+	refreshSTA();
 	printf("\nStarting Event-Triggered Average:\n"); // prints to terminal
 	QTimer::singleShot(0, this, SLOT(resizeMe()));
 }
@@ -222,20 +223,18 @@ void STA::bookkeep() {
 		staavg[i] = 0;
 		time[i] = dt * i - leftwintime;
 	}
-	//emit setPlotRange(-leftwintime, rightwintime, plotymin, plotymax);
-	//refreshSTA();
+	emit setPlotRange(-leftwintime, rightwintime, plotymin, plotymax);
+//	refreshSTA();
 }
 
 void STA::refreshSTA() {
 	rCurve->setSamples(time, staavg);//, n);
 	rplot->replot();
 	emit setPlotRange(-leftwintime, rightwintime, plotymin, plotymax);
-	/*
-	emit setPlotRange(rplot->axisScaleDiv(QwtPlot::xBottom)->lowerBound(),
-	rplot->axisScaleDiv(QwtPlot::xBottom)->upperBound(), rplot->axisScaleDiv(
-	QwtPlot::yLeft)->lowerBound(),
-	rplot->axisScaleDiv(QwtPlot::yLeft)->upperBound());
-	*/
+	emit setPlotRange( rplot->axisScaleDiv(QwtPlot::xBottom).lowerBound(),
+	                   rplot->axisScaleDiv(QwtPlot::xBottom).upperBound(), 
+	                   rplot->axisScaleDiv(QwtPlot::yLeft).lowerBound(),
+	                   rplot->axisScaleDiv(QwtPlot::yLeft).upperBound() );
 }
 
 void STA::clearData() {
@@ -307,23 +306,21 @@ bool STA::OpenFile(QString FName) {
 }
 
 void STA::print() {
-/*
-	#if 1
+#if 1
 	QPrinter printer;
-	#else
+#else
 	QPrinter printer(QPrinter::HighResolution);
-	#if QT_VERSION < 0x040000
+#if QT_VERSION < 0x040000
 	printer.setOutputToFile(true);
 	printer.setOutputFileName("/tmp/STA.ps");
 	printer.setColorMode(QPrinter::Color);
-	#else
+#else
 	printer.setOutputFileName("/tmp/STA.pdf");
-	#endif
-	#endif
+#endif
+#endif
 	
 	QString docName = rplot->title().text();
-	if (!docName.isEmpty())
-		{
+	if (!docName.isEmpty()) {
 		docName.replace(QRegExp(QString::fromLatin1("\n")), tr(" -- "));
 		printer.setDocName(docName);
 	}
@@ -331,12 +328,13 @@ void STA::print() {
 	printer.setCreator("RTXI");
 	printer.setOrientation(QPrinter::Landscape);
 	
-	#if QT_VERSION >= 0x040000
+#if QT_VERSION >= 0x040000
 	QPrintDialog dialog(&printer);
 	if ( dialog.exec() ) {
-		#else
+#else
 		if (printer.setup()) {
-			#endif
+#endif
+/*
 			RTXIPrintFilter filter;
 			if (printer.colorMode() == QPrinter::GrayScale) {
 				int options = QwtPlotPrintFilter::PrintAll;
@@ -345,19 +343,21 @@ void STA::print() {
 				QwtPlotPrintFilter::CanvasBackground);
 				filter.color(Qt::white, QwtPlotPrintFilter::CurveSymbol);
 			}
-			rplot->print(printer, filter);
-		}
 */
+//			rplot->print(printer, filter);
+			QwtPlotRenderer *renderer = new QwtPlotRenderer;
+			renderer->renderTo(rplot, printer);
+		}
 }
 	
 void STA::exportSVG() {
 	QString fileName = "STA.svg";
 		
-	#if QT_VERSION < 0x040000
+#if QT_VERSION < 0x040000
 	
-	#ifndef QT_NO_FILEDIALOG
+#ifndef QT_NO_FILEDIALOG
 	fileName = QFileDialog::getSaveFileName("STA.svg", "SVG Documents (*.svg)", this);
-	#endif
+#endif
 	if (!fileName.isEmpty()) {
 		// enable workaround for Qt3 misalignments
 		QwtPainter::setSVGMode(true);
@@ -368,20 +368,19 @@ void STA::exportSVG() {
 		picture.save(fileName, "svg");
 	}
 	
-	#elif QT_VERSION >= 0x040300
+#elif QT_VERSION >= 0x040300
 	
-	#ifdef QT_SVG_LIB
-	#ifndef QT_NO_FILEDIALOG
-	fileName = QFileDialog::getSaveFileName(
-	this, "Export File Name", QString(),
-	"SVG Documents (*.svg)");
-	#endif
+#ifdef QT_SVG_LIB
+#ifndef QT_NO_FILEDIALOG
+	fileName = QFileDialog::getSaveFileName(this, "Export File Name", QString(),
+	                                        "SVG Documents (*.svg)");
+#endif
 	if ( !fileName.isEmpty() ) {
 		QSvgGenerator generator;
 		generator.setFileName(fileName);
 		generator.setSize(QSize(800, 600));
 		rplot->print(generator);
 	}
-	#endif
-	#endif
+#endif
+#endif
 }
