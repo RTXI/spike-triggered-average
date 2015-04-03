@@ -66,7 +66,7 @@ static DefaultGUIModel::variable_t vars[] = {
 static size_t num_vars = sizeof(vars) / sizeof(DefaultGUIModel::variable_t);
 
 // Default constructor
-STA::STA(void) : DefaultGUIModel("STA", ::vars, ::num_vars) {
+STA::STA(void) : DefaultGUIModel("Spike-Triggered Average", ::vars, ::num_vars) {
 	setWhatsThis(
 	"<p><b>STA:</b></p><p> This plug-in computes an event-triggered average of the input signal. The event trigger should provide a value of 1. The averaged signal will update periodically. Click and drag on the plot to resize the axes.</p>");
 	initParameters();
@@ -92,15 +92,19 @@ void STA::customizeGUI(void) {
 	QVBoxLayout *rightLayout = new QVBoxLayout;
 	QGroupBox *plotBox = new QGroupBox("Event-triggered Average Plot");
 	QHBoxLayout *plotBoxLayout = new QHBoxLayout;
+	QVBoxLayout *plotBoxOneLayout = new QVBoxLayout;
+	QVBoxLayout *plotBoxTwoLayout = new QVBoxLayout;
 	plotBox->setLayout(plotBoxLayout);
+	plotBoxLayout->addLayout(plotBoxOneLayout);
+	plotBoxLayout->addLayout(plotBoxTwoLayout);
 	QPushButton *clearButton = new QPushButton("&Clear");
-	QPushButton *savePlotButton = new QPushButton("Save Screenshot");
+	QPushButton *savePlotButton = new QPushButton("Screenshot");
 	QPushButton *printButton = new QPushButton("Print");
 	QPushButton *saveDataButton = new QPushButton("Save Data");
-	plotBoxLayout->addWidget(clearButton);
-	plotBoxLayout->addWidget(savePlotButton);
-	plotBoxLayout->addWidget(printButton);
-	plotBoxLayout->addWidget(saveDataButton);
+	plotBoxOneLayout->addWidget(clearButton);
+	plotBoxOneLayout->addWidget(savePlotButton);
+	plotBoxTwoLayout->addWidget(printButton);
+	plotBoxTwoLayout->addWidget(saveDataButton);
 	
 	rightLayout->addWidget(rplot);
 	
@@ -123,8 +127,8 @@ void STA::customizeGUI(void) {
 	timer2->start(2000);
 	QObject::connect(timer2, SIGNAL(timeout(void)), this, SLOT(refreshSTA(void)));
 
-	customLayout->addWidget(plotBox, 0, 0, 1, 2);
-	customLayout->addLayout(rightLayout, 1, 1);
+	customLayout->addWidget(plotBox, 0, 0, 1, 1);
+	customLayout->addLayout(rightLayout, 0, 1, 11, 1);
 	setLayout(customLayout);
 }
 
