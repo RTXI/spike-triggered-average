@@ -29,6 +29,8 @@ $ sudo apt-get install libboost-dev
 ####States
 1. Event Count : Number of spikes (events) that are included in the current average
 
+<!--
 Here is an example of how you can compute the average spike waveform of the [Connor-Stevens model neuron](https://github.com/RTXI/connor-stevens):
 
 ![EDIT THIS LINK](http://www.rtxi.org/wp-content/uploads/2010/04/STA1.png)
+-->
