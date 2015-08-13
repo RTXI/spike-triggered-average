@@ -26,7 +26,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <boost/circular_buffer.hpp>
 #include <basicplot.h>
 //#include <RTXIprintfilter.h>
-#include <QtGui>
 #include <cstdlib>
 #include <qwt_plot_curve.h>
 #include <qwt_compat.h>
