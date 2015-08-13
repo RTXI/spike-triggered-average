@@ -32,18 +32,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
 
-#if QT_VERSION >= 0x040300
-#ifdef QT_SVG_LIB
 #include <QSvgGenerator>
-#endif
-#endif
 
-#if QT_VERSION >= 0x040000
-#include <QPrintDialog>
+#include <QtPrintSupport/QPrinter>
+#include <QtPrintSupport/QPrintDialog>
 #include <QFileInfo>
-#else
-#include <qwt_painter.h>
-#endif
 
 extern "C" Plugin::Object *createRTXIPlugin(void) {
 	return new STA();
@@ -82,6 +75,7 @@ STA::STA(void) : DefaultGUIModel("Spike-Triggered Average", ::vars, ::num_vars) 
 
 void STA::customizeGUI(void) {
 	QGridLayout *customLayout = DefaultGUIModel::getLayout();
+	customLayout->setColumnStretch(1, 1);
 	
 	rplot = new BasicPlot(this);
 	rCurve = new QwtPlotCurve("Curve 1");
