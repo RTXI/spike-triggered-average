@@ -9,12 +9,12 @@ HEADERS = spike-triggered-average.h\
 
 SOURCES = spike-triggered-average.cpp \
           moc_spike-triggered-average.cpp\
-			 $(RTXI_INCLUDES)/basicplot.cpp\
+          $(RTXI_INCLUDES)/basicplot.cpp\
           $(RTXI_INCLUDES)/scrollbar.cpp\
           $(RTXI_INCLUDES)/scrollzoomer.cpp\
           $(RTXI_INCLUDES)/moc_scrollbar.cpp\
           $(RTXI_INCLUDES)/moc_scrollzoomer.cpp\
-			 $(RTXI_INCLUDES)/moc_basicplot.cpp\
+          $(RTXI_INCLUDES)/moc_basicplot.cpp\
 
 LIBS = -lqwt
 

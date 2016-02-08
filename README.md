@@ -6,8 +6,9 @@
 ![Spite-Triggered Average GUI](spike-triggered-average.png)
 
 <!--start-->
-This module computes an event or spike-triggered average of any input signal. You specify a time window of interest around the spike. This screenshot was made using a neuron model to generate spikes and the SpikeDetect module to detect spikes. The STA module then plots the average spike shape waveform is plotted.
+This module computes an event or spike-triggered average of any input signal. You specify a time window of interest around the spike. This screenshot was made using a neuron model to generate spikes and the SpikeDetect module to detect spikes. The STA module then plots the average spike shape waveform is plotted.  
 <!--end-->
+
 To install the Boost libraries in Ubuntu:
 ````
 $ sudo apt-get install libboost-dev
@@ -31,6 +32,4 @@ $ sudo apt-get install libboost-dev
 
 <!--
 Here is an example of how you can compute the average spike waveform of the [Connor-Stevens model neuron](https://github.com/RTXI/connor-stevens):
-
-![EDIT THIS LINK](http://www.rtxi.org/wp-content/uploads/2010/04/STA1.png)
 -->
