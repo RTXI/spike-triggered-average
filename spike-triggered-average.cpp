@@ -69,7 +69,6 @@ STA::STA(void) : DefaultGUIModel("Spike-Triggered Average", ::vars, ::num_vars) 
 	
 	emit setPlotRange(-leftwintime, rightwintime, plotymin, plotymax);
 	refreshSTA();
-	printf("\nStarting Event-Triggered Average:\n"); // prints to terminal
 	QTimer::singleShot(0, this, SLOT(resizeMe()));
 }
 
@@ -172,12 +171,10 @@ void STA::update(DefaultGUIModel::update_flags_t flag) {
 
 		case PAUSE:
 			output(0) = 0; // stop command in case pause occurs in the middle of command
-			printf("Protocol paused.\n");
 			break;
 
 		case UNPAUSE:
 			bookkeep();
-			printf("Protocol started.\n");
 			break;
 
 		case PERIOD:
@@ -265,7 +262,6 @@ void STA::saveData() {
 				stream << (double) time[i] << " " << (double) staavg[i] << "\n";
 			}
 			dataFile.close();
-			printf("File closed.\n");
 		} else {
 			QMessageBox::information(this,
 			"Event-triggered Average: Save Average",
@@ -298,7 +294,6 @@ bool STA::OpenFile(QString FName) {
 		if (!dataFile.open(QIODevice::Unbuffered | QIODevice::WriteOnly))	return false;
 	}
 	stream.setDevice(&dataFile);
-	printf("File opened: %s\n", FName.toUtf8().constData());
 	return true;
 }
 
