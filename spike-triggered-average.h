@@ -66,12 +66,17 @@ class STA : public DefaultGUIModel {
 		int leftwin; // number of timesteps
 		int rightwin;
 		int n;
+		double threshold;
+		int plotRefresh;
 		double plotymin;
 		double plotymax;
+		double interval;
+		long long last_event_time;
 		
 		// QT components
 		BasicPlot *rplot;
 		QwtPlotCurve *rCurve;
+		QTimer *timer2;
 		
 		// STA functions
 		void initParameters();
