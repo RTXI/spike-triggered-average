@@ -1,40 +1,33 @@
 ### Spike-Triggered Average
 
-**Requirements:** Qwt, Spike Detector plugin, Plot helper classes (included), Boost libraries  
-**Limitations:** None noted  
+**Requirements:** Spike Detector, Plot helper classes (included), Boost libraries
+**Limitations:** None
 
-![Spite-Triggered Average GUI](spike-triggered-average.png)
+![Spike-Triggered Average GUI](spike-triggered-average.png)
 
 <!--start-->
-This module computes an event or spike-triggered average of any input signal.
-You specify a time window of interest around the spike. This screenshot was
-made using a neuron model to generate spikes and the SpikeDetect module to
-detect spikes. The STA module then plots the average spike shape waveform is
-plotted.  
+<p><b>STA:</b></p><p> This plug-in computes an event-triggered average of the
+input signal. The event trigger should provide a value of 1. The averaged
+signal will update periodically. Click and drag on the plot to resize the
+axes.</p>
 <!--end-->
 
-To install the Boost libraries in Ubuntu:
-````
-$ sudo apt-get install libboost-dev
-````
+#### Input
+1. input(0) - Input : Quantity to compute the spike-triggered average for
+2. input(1) - Event Trigger : trigger that indicates the spike time/event (=1)
 
-#### Input Channels
-1. input(0) – “Input” : Quantity to compute the spike-triggered average for
-2. input(1) – “Event Trigger” : trigger that indicates the spike time/event (=1)
+#### Output
 
-#### Output Channels
-1. output(0) – “Isyn” : Output current (A)
 
 #### Parameters
-1. Left Window (s) : Amount of time before the spike to include in average
-2. Right Window (s) : Amount of time after the spike to include in average
-3. Plot y-min : Minimum for y-axis on the plot
-4. Plot y-max : Maximum for y-axis on the plot
+1. Trigger Threshold (V) - Threshold for detecting a trigger in volts
+2. Interval (s) - Minimum time between events
+3. Plot X-min (s) - Amount of time before the spike to include in average
+4. Plot X-max (s) - Amount of time after the spike to include in average
+5. Plot Y-min (V) - Minimum for y-axis on the plot
+6. Plot Y-max (V) - Minimum for y-axis on the plot
+7. Plot Refresh (ms) - Interval for updating plot
 
 #### States
-1. Event Count : Number of spikes (events) that are included in the current average
-
-<!--
-Here is an example of how you can compute the average spike waveform of the
-[Connor-Stevens model neuron](https://github.com/RTXI/connor-stevens):
--->
+1. Event Count - Number of spikes/events included in the current average
+2. Time (s) - Time (s)
