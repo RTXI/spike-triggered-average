@@ -31,6 +31,7 @@
 #include <sys/stat.h>
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
+#include <qwt_plot_renderer.h>
 
 #include <QSvgGenerator>
 
@@ -362,14 +363,15 @@ void STA::exportSVG() {
 
 #ifdef QT_SVG_LIB
 #ifndef QT_NO_FILEDIALOG
-	fileName = QFileDialog::getSaveFileName(this, "Export File Name", QString(),
+	fileName = QFileDialog::getSaveFileName(this, "Export File Name", "STA.svg",
 			"SVG Documents (*.svg)");
 #endif
 	if ( !fileName.isEmpty() ) {
 		QSvgGenerator generator;
 		generator.setFileName(fileName);
-		generator.setSize(QSize(800, 600));
-		rplot->print(generator);
+		// generator.setSize(QSize(800, 600));
+		QwtPlotRenderer renderer;
+		renderer.renderTo(rplot, generator);
 	}
 #endif
 #endif
