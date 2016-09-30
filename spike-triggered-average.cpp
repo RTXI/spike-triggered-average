@@ -340,37 +340,37 @@ void STA::print() {
 		}
 	}
 
-	void STA::exportSVG() {
-		QString fileName = "STA.svg";
+void STA::exportSVG() {
+	QString fileName = "STA.svg";
 
 #if QT_VERSION < 0x040000
 
 #ifndef QT_NO_FILEDIALOG
-		fileName = QFileDialog::getSaveFileName("STA.svg", "SVG Documents (*.svg)", this);
+	fileName = QFileDialog::getSaveFileName("STA.svg", "SVG Documents (*.svg)", this);
 #endif
-		if (!fileName.isEmpty()) {
-			// enable workaround for Qt3 misalignments
-			QwtPainter::setSVGMode(true);
-			QPicture picture;
-			QPainter p(&picture);
-			rplot->print(&p, QRect(0, 0, 800, 600));
-			p.end();
-			picture.save(fileName, "svg");
-		}
+	if (!fileName.isEmpty()) {
+		// enable workaround for Qt3 misalignments
+		QwtPainter::setSVGMode(true);
+		QPicture picture;
+		QPainter p(&picture);
+		rplot->print(&p, QRect(0, 0, 800, 600));
+		p.end();
+		picture.save(fileName, "svg");
+	}
 
 #elif QT_VERSION >= 0x040300
 
 #ifdef QT_SVG_LIB
 #ifndef QT_NO_FILEDIALOG
-		fileName = QFileDialog::getSaveFileName(this, "Export File Name", QString(),
-				"SVG Documents (*.svg)");
+	fileName = QFileDialog::getSaveFileName(this, "Export File Name", QString(),
+			"SVG Documents (*.svg)");
 #endif
-		if ( !fileName.isEmpty() ) {
-			QSvgGenerator generator;
-			generator.setFileName(fileName);
-			generator.setSize(QSize(800, 600));
-			rplot->print(generator);
-		}
-#endif
-#endif
+	if ( !fileName.isEmpty() ) {
+		QSvgGenerator generator;
+		generator.setFileName(fileName);
+		generator.setSize(QSize(800, 600));
+		rplot->print(generator);
 	}
+#endif
+#endif
+}
