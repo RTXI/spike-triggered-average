@@ -7,7 +7,7 @@ HEADERS = spike-triggered-average.h\
 SOURCES = spike-triggered-average.cpp \
           moc_spike-triggered-average.cpp\
 
-LIBS = -lqwt -lrtplot
+LIBS = -lrtplot
 
 ### Do not edit below this line ###
 
